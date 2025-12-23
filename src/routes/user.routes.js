@@ -1,22 +1,23 @@
 import { Router } from "express";
-import { registerUser } from "../controllers/user.controller.js";
+import { registerUser, loginUser, logoutUser, refreshAccessToken } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
-const router = Router()
+const router = Router();
 
-router.route("/register").post(
-    upload.fields([
-        {
-            name: "avatar",
-            maxCount: 1
-        },
+// ✅ Avatar mandatory, coverImage optional
+router.post(
+  "/register",
+  upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
+  ]),
+  registerUser
+);
 
-        {
-            name: "coverImage",
-            maxCount: 1
-        }
+router.post("/login", loginUser);
+router.post("/logout", verifyJWT, logoutUser);
 
-    ]),
-    registerUser)
+router.route("/refresh-token").post(refreshAccessToken)
 
-export default router
+export default router;
